@@ -1,6 +1,6 @@
 import click
 from mswp.utils import get_sample_graph, draw_graph, draw_bipartite_graph
-from mswp.mswp import mswp
+from mswp.algo import mswp
 
 
 @click.command()

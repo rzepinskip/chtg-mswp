@@ -5,12 +5,16 @@ from typing import List
 
 def get_sample_graph() -> nx.Graph:
     G = nx.Graph()
-    G.add_node(1, weight=1)
-    G.add_node(2, weight=1)
-    G.add_node(3, weight=1)
-    G.add_node(4, weight=1)
-    G.add_node(5, weight=20)
-    G.add_node(6, weight=20)
+    G.add_nodes_from(
+        [
+            (1, dict(weight=1)),
+            (2, dict(weight=1)),
+            (3, dict(weight=1)),
+            (4, dict(weight=1)),
+            (5, dict(weight=20)),
+            (6, dict(weight=20)),
+        ]
+    )
     G.add_edges_from([(1, 2), (1, 4), (1, 6), (3, 2), (3, 4), (3, 6), (5, 2), (5, 4)])
     return G
 
