@@ -6,8 +6,8 @@ from mswp.algo import mswp
 @click.command()
 def main():
     G = get_sample_graph()
-    # draw_bipartite_graph(G)
-    mswp(G)
+    draw_bipartite_graph(G)
+    print(mswp(G))
 
 
 if __name__ == "__main__":

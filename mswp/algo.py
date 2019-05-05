@@ -3,24 +3,26 @@ import itertools
 from math import floor
 from typing import Iterable, FrozenSet, Any, Set, Dict
 from orderedset import OrderedSet
+import numpy as np
 
-
+#TODO: Use function modification f'(S) = (k^n + 1)^{f(S)}
 def mswp(G: nx.Graph) -> int:
     n = G.number_of_nodes()
     W = max([attr["weight"] for node, attr in G.nodes.items()])
-    w_min = n ** 2 * W
+    w_min = n * W
     for k in range(1, n + 1):
         t = swp(G, frozenset(G.nodes), k, W)
-        r = k ** 2 * W
-        alpha = list()
+        r = k * W
+        alpha = np.empty(r + 1, dtype=int)
         while r >= 0:
-            alpha_r = t // (k ** n + 1) ** r
-            if alpha_r == 0:
-                alpha.append(r)
+            alpha[r] = t / ((k ** n + 1) ** r)
             t = t % ((k ** n + 1) ** r)
             r = r - 1
+        r = 0
+        while r <= k * W and alpha[r] == 0:
+            r = r + 1
 
-        if len(alpha) > 0 and alpha[-1] < w_min:
+        if r < w_min:
             w_min = r
 
     return w_min
@@ -47,7 +49,7 @@ def swp(G: nx.Graph, V: FrozenSet[int], k: int, M: int):
             for c in range(1, k + 1):
                 g[(c, c, m)] = f_dashed[(m, outer)]
             for t in range(1, k + 1):
-                for s in range(1, t):
+                for s in range(t - 1, 0, -1):
                     g_tmp = 0
                     for m_0 in range(0, m + 1):
                         m_1 = m - m_0

@@ -32,5 +32,41 @@ def test_basic():
     )
     G.add_edges_from([(1, 2),(2,3)])
 
+    expected_result = {
+        (frozenset({1, 2, 3}), 1, 0): 0,
+        (frozenset({1, 2, 3}), 1, 1): 0,
+        (frozenset({1, 2, 3}), 1, 2): 0,
+        (frozenset({1, 2, 3}), 1, 3): 0,
+        (frozenset({1, 2}), 1, 0): 0,
+        (frozenset({1, 2}), 1, 1): 1,
+        (frozenset({1, 2}), 1, 2): 0,
+        (frozenset({1, 2}), 1, 3): 0,
+        (frozenset({2, 3}), 1, 0): 0,
+        (frozenset({2, 3}), 1, 1): 1,
+        (frozenset({2, 3}), 1, 2): 0,
+        (frozenset({2, 3}), 1, 3): 0,
+        (frozenset({1, 3}), 1, 0): 0,
+        (frozenset({1, 3}), 1, 1): 1,
+        (frozenset({1, 3}), 1, 2): 0,
+        (frozenset({1, 3}), 1, 3): 0,
+        (frozenset({1}), 1, 0): 0,
+        (frozenset({1}), 1, 1): 2,
+        (frozenset({1}), 1, 2): 0,
+        (frozenset({1}), 1, 3): 0,
+        (frozenset({2}), 1, 0): 0,
+        (frozenset({2}), 1, 1): 2,
+        (frozenset({2}), 1, 2): 1,
+        (frozenset({2}), 1, 3): 0,
+        (frozenset({3}), 1, 0): 0,
+        (frozenset({3}), 1, 1): 2,
+        (frozenset({3}), 1, 2): 0,
+        (frozenset({3}), 1, 3): 0,
+        (frozenset(), 1, 0): 0,
+        (frozenset(), 1, 1): 3,
+        (frozenset(), 1, 2): 1,
+        (frozenset(), 1, 3): 0
+    }
+
     W = max([attr["weight"] for node, attr in G.nodes.items()])
     T = calc_T_table(G, frozenset(G.nodes), W)
+    assert T == expected_result
