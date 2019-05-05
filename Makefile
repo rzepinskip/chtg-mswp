@@ -6,6 +6,7 @@
 
 PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PYTHON_INTERPRETER = python3.6
+PROJECT_NAME = mswp
 VENV_NAME = .env
 
 #################################################################################
@@ -14,6 +15,7 @@ VENV_NAME = .env
 
 ## Install Python Dependencies
 requirements: 
+	$(PYTHON_INTERPRETER) setup.py install
 	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
 
 ## Delete all compiled Python files
@@ -24,8 +26,8 @@ clean:
 
 ## Lint using flake8 nad check types using mypy
 lint:
-	flake8 sentinel
-	mypy sentinel --ignore-missing-imports
+	flake8 $(PROJECT_NAME)
+	mypy $(PROJECT_NAME) --ignore-missing-imports
 
 ## Create virtual environment:
 create_environment:
@@ -38,6 +40,9 @@ tests:
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################
+
+sample:
+	$(PYTHON_INTERPRETER) main.py
 
 #################################################################################
 # Self Documenting Commands                                                     #
