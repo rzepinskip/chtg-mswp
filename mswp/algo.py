@@ -84,11 +84,11 @@ def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int):
             for l in range(0, n - len(X) + 2):
                 for v in X:
                     if G.node[v]["weight"] < q:
-                        val = T[(X, q, l)] + T[(X + G.neighbors(v), q, l - 1)]
+                        val = T[(X, q, l)] + T[(X.union(G.neighbors(v)), q, l - 1)]
                     elif G.node[v]["weight"] == q and l > 1:
-                        val = T[(X, q, l)] + T[(X + G.neighbors(v), q, l - 1)]
+                        val = T[(X, q, l)] + T[(X.union(G.neighbors(v)), q, l - 1)]
                     elif G.node[v]["weight"] == q and l == 1:
-                        val = T[(X, q, l)] + T[(X + G.neighbors(v), q, l - 1)] + 1
+                        val = T[(X, q, l)] + T[(X.union(G.neighbors(v)), q, l - 1)] + 1
                     else:
                         val = T[(X, q, l)]
                     T[(X - {v}, q, l)] = val
