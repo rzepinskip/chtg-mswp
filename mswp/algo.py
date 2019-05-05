@@ -2,6 +2,7 @@ import networkx as nx
 import itertools
 from math import floor
 from typing import Iterable, FrozenSet, Any, Set, Dict
+from orderedset import OrderedSet
 
 
 def mswp(G: nx.Graph) -> int:
@@ -79,9 +80,10 @@ def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int):
         for X in powerset(V).difference(V):
             for l in range(n - len(X) + 1, n + 1):
                 T[(X, q, l)] = 0
+            T[X, q, 0] = 0
     for q in range(1, M + 1):
-        for X in powerset(V).difference(V, frozenset()):
-            for l in range(0, n - len(X) + 2):
+        for X in powerset(V).difference(OrderedSet([V, frozenset()])):
+            for l in range(1, n - len(X) + 2):
                 for v in X:
                     if G.node[v]["weight"] < q:
                         val = T[(X, q, l)] + T[(X.union(G.neighbors(v)), q, l - 1)]
@@ -95,9 +97,10 @@ def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int):
     return T
 
 
-def powerset(l) -> FrozenSet[FrozenSet[Any]]:
+def powerset(l):
     """[1, 2, 3] -> {{}, {2}, {2, 3}, {1}, {1, 2}, {3}, {1, 3}, {1, 2, 3}}"""
-    result = [()]
-    for i in range(len(l)):
+    result = []
+    for i in reversed(range(len(l))):
         result += itertools.combinations(l, i + 1)
-    return frozenset([frozenset(x) for x in result])
+    result += [()]
+    return OrderedSet([frozenset(x) for x in result])
