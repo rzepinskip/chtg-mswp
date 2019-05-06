@@ -82,8 +82,12 @@ def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int, weight_func: Callable[[
                     if weight < q:
                         val = T[(X, q, l)] + T[(X.union(G.neighbors(v)), q, l - 1)]
                     elif weight == q and l > 1:
-                        val = T[(X, q, l)] + sum([T[(X.union(G.neighbors(v)), j, l - 1)]
-                                                  for j in range(1, q + 1)])
+                        val = T[(X, q, l)] + sum(
+                            [
+                                T[(X.union(G.neighbors(v)), j, l - 1)]
+                                for j in range(1, q + 1)
+                            ]
+                        )
                     elif weight == q and l == 1:
                         val = T[(X, q, l)] + 1
                     else:
