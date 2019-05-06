@@ -6,6 +6,7 @@ from orderedset import OrderedSet
 
 def test_powerset_dict_basic():
     ps = powerset_dict([1, 2, 3])
+    assert ps[frozenset([])] == OrderedSet([frozenset()])
     assert ps[frozenset([1])] == OrderedSet([frozenset({1}), frozenset()])
     assert ps[frozenset([1, 2])] == OrderedSet(
         [frozenset({1, 2}), frozenset({1}), frozenset({2}), frozenset()]
