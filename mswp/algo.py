@@ -5,13 +5,12 @@ from typing import Iterable, FrozenSet, Any, Set, Dict
 from orderedset import OrderedSet
 import numpy as np
 
-#TODO: Use function modification f'(S) = (k^n + 1)^{f(S)}
 def mswp(G: nx.Graph) -> int:
     n = G.number_of_nodes()
     W = max([attr["weight"] for node, attr in G.nodes.items()])
     w_min = n * W
     for k in range(1, n + 1):
-        t = swp(G, frozenset(G.nodes), k, W)
+        t = swp(G, frozenset(G.nodes), k, (k ** n + 1) ** W)
         r = k * W
         alpha = np.empty(r + 1, dtype=int)
         while r >= 0:
@@ -22,7 +21,7 @@ def mswp(G: nx.Graph) -> int:
         while r <= k * W and alpha[r] == 0:
             r = r + 1
 
-        if r < w_min:
+        if r <= k * W and r < w_min:
             w_min = r
 
     return w_min
@@ -31,7 +30,7 @@ def mswp(G: nx.Graph) -> int:
 def swp(G: nx.Graph, V: FrozenSet[int], k: int, M: int):
     n = len(V)
     f_dashed = dict()
-    T = calc_T_table(G, V, M)
+    T = calc_T_table(G, V, M, k)
     for X in powerset(V):
         outer = V - X
         for l in range(0, n + 1):
@@ -64,23 +63,24 @@ def swp(G: nx.Graph, V: FrozenSet[int], k: int, M: int):
     return p_val
 
 
-def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int):
+def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int, k):
     T = get_empty_T_table(V, M)
     n = len(V)
     for q in range(1, M + 1):
         for v in V:
-            weight = G.node[v]["weight"]
+            weight = (k ** n + 1) ** G.node[v]["weight"]
             if weight == q:
                 T[(V - {v}, q, 1)] = 1
     for q in range(1, M + 1):
         for X in powerset(V).difference(OrderedSet([V, frozenset()])):
             for l in range(1, n - len(X) + 2):
                 for v in X:
-                    if G.node[v]["weight"] < q:
+                    weight = (k ** n + 1) ** G.node[v]["weight"]
+                    if weight < q:
                         val = T[(X, q, l)] + T[(X.union(G.neighbors(v)), q, l - 1)]
-                    elif G.node[v]["weight"] == q and l > 1:
+                    elif weight == q and l > 1:
                         val = T[(X, q, l)] + sum([T[(X.union(G.neighbors(v)), j, l - 1)] for j in range(1, q + 1)])
-                    elif G.node[v]["weight"] == q and l == 1:
+                    elif weight == q and l == 1:
                         val = T[(X, q, l)] + 1
                     else:
                         val = T[(X, q, l)]
