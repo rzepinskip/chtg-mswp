@@ -38,8 +38,7 @@ def swp(G: nx.Graph, V: FrozenSet[int], k: int, M: int):
             f_val = 0
             for q in range(1, M + 1):
                 f_val = f_val + q * T[(outer, q, l)]
-            f_dashed[(l, outer)] = f_val
-
+            f_dashed[(l, X)] = f_val
     g = dict()
     b = dict()
     p_val = 0
@@ -60,29 +59,19 @@ def swp(G: nx.Graph, V: FrozenSet[int], k: int, M: int):
                         )
                     g[(s, t, m)] = g_tmp
         b[X] = g[(1, k, n)]
-        p_val = p_val + (-1) ** len(X) * b[X]
+        p_val = p_val + ((-1) ** len(X)) * b[X]
 
     return p_val
 
 
 def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int):
-    T = dict()
+    T = get_empty_T_table(V, M)
     n = len(V)
-    for l in range(0, n + 1):
-        for q in range(1, M + 1):
-            T[(V, q, l)] = 0
     for q in range(1, M + 1):
         for v in V:
             weight = G.node[v]["weight"]
             if weight == q:
                 T[(V - {v}, q, 1)] = 1
-            else:
-                T[(V - {v}, q, 1)] = 0
-    for q in range(1, M + 1):
-        for X in powerset(V).difference(V):
-            for l in range(n - len(X) + 1, n + 1):
-                T[(X, q, l)] = 0
-            T[X, q, 0] = 0
     for q in range(1, M + 1):
         for X in powerset(V).difference(OrderedSet([V, frozenset()])):
             for l in range(1, n - len(X) + 2):
@@ -90,14 +79,21 @@ def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int):
                     if G.node[v]["weight"] < q:
                         val = T[(X, q, l)] + T[(X.union(G.neighbors(v)), q, l - 1)]
                     elif G.node[v]["weight"] == q and l > 1:
-                        val = T[(X, q, l)] + T[(X.union(G.neighbors(v)), q, l - 1)]
+                        val = T[(X, q, l)] + sum([T[(X.union(G.neighbors(v)), j, l - 1)] for j in range(1, q + 1)])
                     elif G.node[v]["weight"] == q and l == 1:
-                        val = T[(X, q, l)] + T[(X.union(G.neighbors(v)), q, l - 1)] + 1
+                        val = T[(X, q, l)] + 1
                     else:
                         val = T[(X, q, l)]
                     T[(X - {v}, q, l)] = val
     return T
 
+def get_empty_T_table(V, W):
+    T = dict()
+    for X in powerset(V):
+        for l in range(0, len(V) + 1):
+            for q in range(1, W + 1):
+                T[(X, q, l)] = 0
+    return T
 
 def powerset(l):
     """[1, 2, 3] -> {{}, {2}, {2, 3}, {1}, {1, 2}, {3}, {1, 3}, {1, 2, 3}}"""
