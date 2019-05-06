@@ -5,6 +5,7 @@ from typing import Iterable, FrozenSet, Any, Set, Dict
 from orderedset import OrderedSet
 import numpy as np
 
+
 def mswp(G: nx.Graph) -> int:
     n = G.number_of_nodes()
     W = max([attr["weight"] for node, attr in G.nodes.items()])
@@ -79,13 +80,19 @@ def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int, k):
                     if weight < q:
                         val = T[(X, q, l)] + T[(X.union(G.neighbors(v)), q, l - 1)]
                     elif weight == q and l > 1:
-                        val = T[(X, q, l)] + sum([T[(X.union(G.neighbors(v)), j, l - 1)] for j in range(1, q + 1)])
+                        val = T[(X, q, l)] + sum(
+                            [
+                                T[(X.union(G.neighbors(v)), j, l - 1)]
+                                for j in range(1, q + 1)
+                            ]
+                        )
                     elif weight == q and l == 1:
                         val = T[(X, q, l)] + 1
                     else:
                         val = T[(X, q, l)]
                     T[(X - {v}, q, l)] = val
     return T
+
 
 def get_empty_T_table(V, W):
     T = dict()
@@ -94,6 +101,7 @@ def get_empty_T_table(V, W):
             for q in range(1, W + 1):
                 T[(X, q, l)] = 0
     return T
+
 
 def powerset(l):
     """[1, 2, 3] -> {{}, {2}, {2, 3}, {1}, {1, 2}, {3}, {1, 3}, {1, 2, 3}}"""
