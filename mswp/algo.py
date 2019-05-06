@@ -1,16 +1,18 @@
 import networkx as nx
 import itertools
 from math import floor
-from typing import Iterable, FrozenSet, Any, Set, Dict
+from typing import Iterable, FrozenSet, Any, Set, Dict, Callable
 from orderedset import OrderedSet
 import numpy as np
+
 
 def mswp(G: nx.Graph) -> int:
     n = G.number_of_nodes()
     W = max([attr["weight"] for node, attr in G.nodes.items()])
     w_min = n * W
     for k in range(1, n + 1):
-        t = swp(G, frozenset(G.nodes), k, (k ** n + 1) ** W)
+        t = swp(G, frozenset(G.nodes), k, (k ** n + 1) ** W,
+                lambda G, v: (k ** n + 1) ** G.node[v]["weight"])
         r = k * W
         alpha = np.empty(r + 1, dtype=int)
         while r >= 0:
@@ -18,6 +20,7 @@ def mswp(G: nx.Graph) -> int:
             t = t % ((k ** n + 1) ** r)
             r = r - 1
         r = 0
+        print(alpha)
         while r <= k * W and alpha[r] == 0:
             r = r + 1
 
@@ -27,10 +30,10 @@ def mswp(G: nx.Graph) -> int:
     return w_min
 
 
-def swp(G: nx.Graph, V: FrozenSet[int], k: int, M: int):
+def swp(G: nx.Graph, V: FrozenSet[int], k: int, M: int, weight_func: Callable[[nx.Graph, int], int]):
     n = len(V)
     f_dashed = dict()
-    T = calc_T_table(G, V, M, k)
+    T = calc_T_table(G, V, M, weight_func)
     for X in powerset(V):
         outer = V - X
         for l in range(0, n + 1):
@@ -63,29 +66,31 @@ def swp(G: nx.Graph, V: FrozenSet[int], k: int, M: int):
     return p_val
 
 
-def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int, k):
+def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int, weight_func: Callable[[nx.Graph, int], int] = lambda G, v: G.node[v]["weight"]):
     T = get_empty_T_table(V, M)
     n = len(V)
     for q in range(1, M + 1):
         for v in V:
-            weight = (k ** n + 1) ** G.node[v]["weight"]
+            weight = weight_func(G, v)
             if weight == q:
                 T[(V - {v}, q, 1)] = 1
     for q in range(1, M + 1):
         for X in powerset(V).difference(OrderedSet([V, frozenset()])):
             for l in range(1, n - len(X) + 2):
                 for v in X:
-                    weight = (k ** n + 1) ** G.node[v]["weight"]
+                    weight = weight_func(G, v)
                     if weight < q:
                         val = T[(X, q, l)] + T[(X.union(G.neighbors(v)), q, l - 1)]
                     elif weight == q and l > 1:
-                        val = T[(X, q, l)] + sum([T[(X.union(G.neighbors(v)), j, l - 1)] for j in range(1, q + 1)])
+                        val = T[(X, q, l)] + sum([T[(X.union(G.neighbors(v)), j, l - 1)]
+                                                  for j in range(1, q + 1)])
                     elif weight == q and l == 1:
                         val = T[(X, q, l)] + 1
                     else:
                         val = T[(X, q, l)]
                     T[(X - {v}, q, l)] = val
     return T
+
 
 def get_empty_T_table(V, W):
     T = dict()
@@ -94,6 +99,7 @@ def get_empty_T_table(V, W):
             for q in range(1, W + 1):
                 T[(X, q, l)] = 0
     return T
+
 
 def powerset(l):
     """[1, 2, 3] -> {{}, {2}, {2, 3}, {1}, {1, 2}, {3}, {1, 3}, {1, 2, 3}}"""
