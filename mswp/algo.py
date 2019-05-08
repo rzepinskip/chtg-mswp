@@ -11,8 +11,7 @@ def mswp(G: nx.Graph) -> int:
     W = max([attr["weight"] for node, attr in G.nodes.items()])
     w_min = n * W
     for k in range(1, n + 1):
-        t = swp(G, frozenset(G.nodes), k, (k ** n + 1) ** W,
-                lambda G, v: (k ** n + 1) ** G.node[v]["weight"])
+        t = swp(G, frozenset(G.nodes), k, W)
         r = k * W
         alpha = np.empty(r + 1, dtype=int)
         while r >= 0:
@@ -20,7 +19,6 @@ def mswp(G: nx.Graph) -> int:
             t = t % ((k ** n + 1) ** r)
             r = r - 1
         r = 0
-        print(alpha)
         while r <= k * W and alpha[r] == 0:
             r = r + 1
 
@@ -30,16 +28,16 @@ def mswp(G: nx.Graph) -> int:
     return w_min
 
 
-def swp(G: nx.Graph, V: FrozenSet[int], k: int, M: int, weight_func: Callable[[nx.Graph, int], int]):
+def swp(G: nx.Graph, V: FrozenSet[int], k: int, M: int):
     n = len(V)
     f_dashed = dict()
-    T = calc_T_table(G, V, M, weight_func)
+    T = calc_T_table(G, V, M)
     for X in powerset(V):
         outer = V - X
         for l in range(0, n + 1):
             f_val = 0
             for q in range(1, M + 1):
-                f_val = f_val + q * T[(outer, q, l)]
+                f_val = f_val + ((k ** n + 1) ** q) * T[(outer, q, l)]
             f_dashed[(l, X)] = f_val
     g = dict()
     b = dict()
@@ -66,19 +64,19 @@ def swp(G: nx.Graph, V: FrozenSet[int], k: int, M: int, weight_func: Callable[[n
     return p_val
 
 
-def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int, weight_func: Callable[[nx.Graph, int], int] = lambda G, v: G.node[v]["weight"]):
+def calc_T_table(G: nx.Graph, V: FrozenSet[int], M: int):
     T = get_empty_T_table(V, M)
     n = len(V)
     for q in range(1, M + 1):
         for v in V:
-            weight = weight_func(G, v)
+            weight = G.node[v]["weight"]
             if weight == q:
                 T[(V - {v}, q, 1)] = 1
     for q in range(1, M + 1):
         for X in powerset(V).difference(OrderedSet([V, frozenset()])):
             for l in range(1, n - len(X) + 2):
                 for v in X:
-                    weight = weight_func(G, v)
+                    weight = G.node[v]["weight"]
                     if weight < q:
                         val = T[(X, q, l)] + T[(X.union(G.neighbors(v)), q, l - 1)]
                     elif weight == q and l > 1:
