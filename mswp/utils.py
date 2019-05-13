@@ -50,6 +50,9 @@ def read_graph_dimacs_format(inputfile):
             elif first_char == "e":
                 _, source, target = line.strip().split(" ")
                 G.add_edge(int(source), int(target))
+            elif first_char == "v":
+                _, node, weight = line.strip().split(" ")
+                G.node[int(node)]["weight"] = int(weight)
             else:
                 raise ValueError("Invalid line beginning")
 

@@ -10,6 +10,7 @@ def test_read_graph_dimacs_format_basic():
     assert set(G.edges) == set(
         [(1, 2), (1, 4), (1, 6), (2, 3), (2, 5), (4, 3), (4, 5), (6, 3)]
     )
+    assert nx.get_node_attributes(G, "weight") == { 1: 1, 2: 1, 3: 1, 4: 1, 5: 5, 6: 5}
 
 
 def test_read_graph_dimacs_format_full():
