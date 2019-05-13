@@ -1,7 +1,7 @@
 import pytest
 
 import networkx as nx
-from mswp.algo import calc_T_table, get_empty_T_table
+from mswp.algo import MSWPAlgo
 
 
 def test_basic():
@@ -17,7 +17,8 @@ def test_basic():
     G.add_edges_from([(1, 2), (1, 4), (2, 3)])
     W = max([attr["weight"] for node, attr in G.nodes.items()])
     V = frozenset(G.nodes)
-    expected_result = get_empty_T_table(V, W)
+    algo = MSWPAlgo(G)
+    expected_result = algo._get_empty_T_table(V, W)
     expected_result[(V - {1}, 1, 1)] = 1
     expected_result[(V - {2}, 1, 1)] = 1
     expected_result[(V - {3}, 3, 1)] = 1
@@ -51,5 +52,5 @@ def test_basic():
     expected_result[(V - {1, 2, 3, 4}, 3, 1)] = 2
     expected_result[(V - {1, 2, 3, 4}, 3, 2)] = 3
 
-    T = calc_T_table(G, frozenset(G.nodes), W)
+    T = algo._calc_T_table(V, W)
     assert T == expected_result
