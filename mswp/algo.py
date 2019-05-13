@@ -19,8 +19,7 @@ class MSWPAlgo:
             t = self._swp(
                 frozenset(self.G.nodes),
                 k,
-                (k ** n + 1) ** W,
-                lambda G, v: (k ** n + 1) ** G.node[v]["weight"],
+                W
             )
             r = k * W
             alpha = np.empty(r + 1, dtype=int)
@@ -29,7 +28,6 @@ class MSWPAlgo:
                 t = t % ((k ** n + 1) ** r)
                 r = r - 1
             r = 0
-            print(alpha)
             while r <= k * W and alpha[r] == 0:
                 r = r + 1
 
@@ -43,17 +41,16 @@ class MSWPAlgo:
         V: FrozenSet[int],
         k: int,
         M: int,
-        weight_func: Callable[[nx.Graph, int], int],
     ):
         n = len(V)
         f_dashed = dict()
-        T = self._calc_T_table(V, M, weight_func)
+        T = self._calc_T_table(V, M)
         for X in self.powerset(V):
             outer = V - X
             for l in range(0, n + 1):
                 f_val = 0
                 for q in range(1, M + 1):
-                    f_val = f_val + q * T[(outer, q, l)]
+                    f_val = f_val + ((k ** n + 1) ** q) * T[(outer, q, l)]
                 f_dashed[(l, X)] = f_val
         g = dict()
         b = dict()
@@ -83,20 +80,19 @@ class MSWPAlgo:
         self,
         V: FrozenSet[int],
         M: int,
-        weight_func: Callable[[nx.Graph, int], int] = lambda G, v: G.node[v]["weight"],
     ):
         T = self._get_empty_T_table(V, M)
         n = len(V)
         for q in range(1, M + 1):
             for v in V:
-                weight = weight_func(self.G, v)
+                weight = self.G.node[v]["weight"]
                 if weight == q:
                     T[(V - {v}, q, 1)] = 1
         for q in range(1, M + 1):
             for X in self.powerset(V).difference(OrderedSet([V, frozenset()])):
                 for l in range(1, n - len(X) + 2):
                     for v in X:
-                        weight = weight_func(self.G, v)
+                        weight = self.G.node[v]["weight"]
                         if weight < q:
                             val = (
                                 T[(X, q, l)]
