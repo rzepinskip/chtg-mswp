@@ -41,6 +41,7 @@ def draw_bipartite_graph(G: nx.Graph):
 
 def read_graph_dimacs_format(inputfile):
     G = nx.Graph()
+    solution = None
 
     with open(inputfile, newline=None) as f:
         for line in f:
@@ -53,7 +54,13 @@ def read_graph_dimacs_format(inputfile):
             elif first_char == "v":
                 _, node, weight = line.strip().split(" ")
                 G.node[int(node)]["weight"] = int(weight)
+            elif first_char == "s":
+                _, solution = line.strip().split(" ")
+                solution = int(solution)
             else:
                 raise ValueError("Invalid line beginning")
 
-    return G
+    return G, solution
+
+def add_weights(G, weight):
+    nx.set_node_attributes(G, weight, 'weight')

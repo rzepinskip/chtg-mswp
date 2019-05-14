@@ -5,7 +5,7 @@ from mswp.utils import read_graph_dimacs_format
 
 
 def test_read_graph_dimacs_format_basic():
-    G = read_graph_dimacs_format("./tests/data/dimacs_basic.col")
+    G, _ = read_graph_dimacs_format("./tests/data/dimacs_basic.col")
     assert set(G.nodes) == set([1, 2, 3, 4, 5, 6])
     assert set(G.edges) == set(
         [(1, 2), (1, 4), (1, 6), (2, 3), (2, 5), (4, 3), (4, 5), (6, 3)]
@@ -14,6 +14,12 @@ def test_read_graph_dimacs_format_basic():
 
 
 def test_read_graph_dimacs_format_full():
-    G = read_graph_dimacs_format("./tests/data/dimacs_full.col")
+    G, _ = read_graph_dimacs_format("./tests/data/dimacs_full.col")
     assert len(G.nodes) == 74
     assert len(G.edges) == 602 / 2
+
+def test_read_graph_dimacs_format_with_solution():
+    G, solution = read_graph_dimacs_format("./tests/data/dimacs_with_solution.col")
+    assert len(G.nodes) == 138
+    assert len(G.edges) == 986 / 2
+    assert solution == 11
