@@ -37,3 +37,23 @@ def draw_bipartite_graph(G: nx.Graph):
     odd_nodes = [v for v in G.nodes if v % 2 == 1]
     node_pos = nx.drawing.layout.bipartite_layout(G, odd_nodes)
     draw_graph(G, node_pos)
+
+
+def read_graph_dimacs_format(inputfile):
+    G = nx.Graph()
+
+    with open(inputfile, newline=None) as f:
+        for line in f:
+            first_char = line[0]
+            if first_char == "c" or first_char == "p":
+                continue
+            elif first_char == "e":
+                _, source, target = line.strip().split(" ")
+                G.add_edge(int(source), int(target))
+            elif first_char == "v":
+                _, node, weight = line.strip().split(" ")
+                G.node[int(node)]["weight"] = int(weight)
+            else:
+                raise ValueError("Invalid line beginning")
+
+    return G
