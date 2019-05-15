@@ -60,7 +60,6 @@ def read_graph_dimacs_format(inputfile):
             else:
                 raise ValueError("Invalid line beginning")
 
+    if len(nx.get_node_attributes(G, 'weight')) == 0:
+        nx.set_node_attributes(G, 1, 'weight')
     return G, solution
-
-def add_weights(G, weight):
-    nx.set_node_attributes(G, weight, 'weight')
