@@ -7,9 +7,9 @@ from mswp.algo import MSWPAlgo, reconstruct_coloring
 def main():
     G = get_sample_graph()
     print(MSWPAlgo(G).mswp())
-    draw_bipartite_graph(G)
-
-    print(reconstruct_coloring(G))
+    coloring = reconstruct_coloring(G)
+    print(coloring)
+    draw_bipartite_graph(G, coloring)
 
 
 if __name__ == "__main__":

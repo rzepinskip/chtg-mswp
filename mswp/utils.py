@@ -1,6 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from typing import List
+from typing import List, Dict
 
 
 def get_sample_graph() -> nx.Graph:
@@ -19,21 +19,25 @@ def get_sample_graph() -> nx.Graph:
     return G
 
 
-def draw_graph(G: nx.Graph, node_pos: List[int] = None):
+def draw_graph(
+    G: nx.Graph, nodes_pos: List[int] = None, color_mapping: Dict[int, int] = None
+):
     node_attrs = nx.get_node_attributes(G, "weight")
     custom_node_attrs = {}
     for node, attr in node_attrs.items():
         custom_node_attrs[node] = f"{node} ({str(attr)})"
 
     args = {"labels": custom_node_attrs, "font_weight": "bold", "node_size": 2000}
-    if node_pos is not None:
-        args["pos"] = node_pos
+    if nodes_pos is not None:
+        args["pos"] = nodes_pos
+    if color_mapping is not None:
+        args["node_color"] = [color_mapping[v] for v in G.nodes]
 
     nx.draw(G, **args)
     plt.show()
 
 
-def draw_bipartite_graph(G: nx.Graph):
+def draw_bipartite_graph(G: nx.Graph, color_mapping: Dict[int, int] = None):
     odd_nodes = [v for v in G.nodes if v % 2 == 1]
-    node_pos = nx.drawing.layout.bipartite_layout(G, odd_nodes)
-    draw_graph(G, node_pos)
+    nodes_pos = nx.drawing.layout.bipartite_layout(G, odd_nodes)
+    draw_graph(G, nodes_pos, color_mapping)
