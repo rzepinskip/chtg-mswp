@@ -4,6 +4,7 @@ from functools import partial
 from random import random, randint
 from itertools import combinations
 from typing import NamedTuple, List, Callable
+import numpy as np
 
 from mswp.algo import MSWPAlgo
 
@@ -29,6 +30,8 @@ def create_test_graph(n_vertices: int, density: float, max_weight: int):
     for i in range(0, n_vertices):
         graph.add_node(i, weight=randint(1, max_weight))
 
+    graph.node[randint(0, n_vertices - 1)]['weight'] = max_weight #To be sure that at least one vertex has weight of max_weight
+
     for x, y in combinations(vertices, 2):
         if random() < density:
             graph.add_edge(x, y)
@@ -50,23 +53,40 @@ def measure_test_cases(test_cases: List[TestCase]):
 
     return {test_case: measure_single_test_case(test_case) for test_case in test_cases}
 
+def complexity(n, M):
+    return ((2 ** n * n ** 2) * (M + n ** 3)) 
 
 def test_vertices_number():
     max_n = 10
-    test_cases = [TestCase(x, 0.5, max_n) for x in range(1, max_n)]
+    test_cases = [TestCase(x, 0.5, max_n) for x in range(1, max_n + 1)]
     result = measure_test_cases(test_cases)
     fig = plt.figure()
     ax = plt.axes()
 
     n = [x.n_vertices for x, _ in result.items()]
     y = [duration for _, duration in result.items()]
-    ax.plot(n, y)
-    ax.plot(n, [x ** 2 for x in n])
+    c = y[4] / (complexity(5, max_n) - 1)
+    ax.plot(n, y, label='t(n)')
+    ax.plot(n, [c * complexity(x, max_n) for x in n], label='g(n)')
+    ax.legend()
     plt.show()
 
 
 def test_max_weight():
-    pass
+    vertices_count = 7
+    max_m = 30
+    test_cases = [TestCase(vertices_count, 0.5, m) for m in range(1, max_m + 1)]
+    result = measure_test_cases(test_cases)
+    fig = plt.figure()
+    ax = plt.axes()
 
+    n = [x.max_weight for x, _ in result.items()]
+    y = [duration for _, duration in result.items()]
+    c = np.polyfit(n, y, 1)
+    ax.plot(n, y, 'bo', label='t(M)')
+    ax.plot(n, [c[0] * m + c[1] for m in n], color='orange')
+    ax.legend()
+    plt.show()
 
-test_vertices_number()
+# test_vertices_number()
+test_max_weight()
