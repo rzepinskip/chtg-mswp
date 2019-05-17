@@ -13,14 +13,14 @@ class MSWPAlgo:
 
     def mswp(self) -> int:
         n = self.G.number_of_nodes()
+
+        if n == 0:
+            return 0
+
         W = max([attr["weight"] for node, attr in self.G.nodes.items()])
         w_min = n * W
         for k in range(1, n + 1):
-            t = self._swp(
-                frozenset(self.G.nodes),
-                k,
-                W
-            )
+            t = self._swp(frozenset(self.G.nodes), k, W)
             r = k * W
             alpha = np.empty(r + 1, dtype=int)
             while r >= 0:
@@ -36,12 +36,7 @@ class MSWPAlgo:
 
         return w_min
 
-    def _swp(
-        self,
-        V: FrozenSet[int],
-        k: int,
-        M: int,
-    ):
+    def _swp(self, V: FrozenSet[int], k: int, M: int):
         n = len(V)
         f_dashed = dict()
         T = self._calc_T_table(V, M)
@@ -76,11 +71,7 @@ class MSWPAlgo:
 
         return p_val
 
-    def _calc_T_table(
-        self,
-        V: FrozenSet[int],
-        M: int,
-    ):
+    def _calc_T_table(self, V: FrozenSet[int], M: int):
         T = self._get_empty_T_table(V, M)
         n = len(V)
         for q in range(1, M + 1):
@@ -138,3 +129,21 @@ def powerset_dict(seq):
         previous = current
     return dic
 
+
+def reconstruct_coloring(G: nx.Graph) -> Dict[int, int]:
+    c = 1
+    colors = dict()
+    while G.number_of_nodes() > 0:
+        mswp_G = MSWPAlgo(G).mswp()
+        for ind_set in nx.find_cliques(nx.complement(G)):
+            w_max = max([G.node[v]["weight"] for v in ind_set])
+            subG = G.subgraph(set(G.nodes) - set(ind_set))
+            mswp_subG = MSWPAlgo(nx.Graph(subG)).mswp()
+            if mswp_G == w_max + mswp_subG:
+                for v in ind_set:
+                    colors[v] = c
+                c = c + 1
+                G = nx.Graph(subG)
+                break
+
+    return colors
